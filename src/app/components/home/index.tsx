@@ -20,7 +20,7 @@ import "./index.css";
 
 const HomeComponent = () => {
   const [playAudio, setPlayAudio] = useState<boolean>(false);
-  const [formData, setFormData] = useState<any>();
+  // const [formData, setFormData] = useState<any>();
   const [audiotext, setaudioText] = useState<any>();
   const [isLoading, setIsloading] = useState(false);
   const [convertedText, setCovertedText] = useState();
@@ -49,7 +49,7 @@ const HomeComponent = () => {
     data.append("language", "en");
 
     console.log("data", data);
-    setFormData(data);
+    // setFormData(data);
 
     if (file.size > 25 * 1024 * 1024) {
       alert("Please upload an audio file less than 25MB");
@@ -58,29 +58,21 @@ const HomeComponent = () => {
 
     try {
       console.log("formData", data);
-      //  const Tdata = new FormData();
-      //  Tdata.append("model", "whisper-1");
-      //  Tdata.append("language", "en");
-      //  setIsloading(true);
-      //  console.log("Tdata", Tdata);
-      const res = await fetch(
+      const res = await axios.post(
         "https://api.openai.com/v1/audio/transcriptions",
+        data,
         {
           headers: {
             Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
           },
-
-          method: "POST",
-          body: data,
         }
       );
 
-      const tdata = await res.json();
+      const tdata = res.data;
       setCovertedText(tdata.text);
 
-      //API call For summry data
-
-      const summaryResponse: any = await axios.post(
+      // API call For summary data
+      const summaryResponse = await axios.post(
         "https://api.openai.com/v1/chat/completions",
         {
           model: "gpt-4",
@@ -106,55 +98,6 @@ const HomeComponent = () => {
     }
   };
 
-  // const sendAudio = async () => {
-  //   try {
-  //     console.log("formData", formData);
-  //     const Tdata = new FormData();
-  //     Tdata.append("model", "whisper-1");
-  //     Tdata.append("language", "en");
-  //     setIsloading(true);
-  //     console.log("Tdata", Tdata);
-  //     const res = await fetch(
-  //       "https://api.openai.com/v1/audio/transcriptions",
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
-  //         },
-
-  //         method: "POST",
-  //         body: Tdata,
-  //       }
-  //     );
-
-  //     const data = await res.json();
-  //     setCovertedText(data.text);
-
-  //     const summaryResponse: any = await axios.post(
-  //       "https://api.openai.com/v1/chat/completions",
-  //       {
-  //         model: "gpt-4",
-  //         messages: [
-  //           {
-  //             role: "user",
-  //             content: `Summarize the following text. Provide a short summary of the meeting and a bulleted list of the main meeting highlights : ${data.text}`,
-  //           },
-  //         ],
-  //       },
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer  ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
-  //           "Content-Type": "application/json",
-  //         },
-  //       }
-  //     );
-  //     setaudioText(summaryResponse?.data.choices[0].message.content);
-  //   } catch {
-  //     console.log("error");
-  //   } finally {
-  //     setIsloading(false);
-  //   }
-  // };
-
   const createAudioFile = async (blobURL: any) => {
     try {
       const reader = new FileReader();
@@ -172,27 +115,26 @@ const HomeComponent = () => {
           modalData.append("model", "whisper-1");
           modalData.append("language", "en");
           console.log("modalData", modalData);
-          setFormData(modalData);
+          // setFormData(modalData);
 
           try {
             setIsloading(true);
             const reader: any = new FileReader();
             reader.readAsDataURL(convertToBlob);
             reader.onloadend = async function () {
-              const response = await fetch(
+              const response = await axios.post(
                 "https://api.openai.com/v1/audio/transcriptions",
+                modalData,
                 {
-                  method: "POST",
                   headers: {
                     Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
                   },
-                  body: modalData,
                 }
-              ).then((res) => res.json());
-              const { text } = response;
+              );
+              const { text } = response.data;
               setCovertedText(text);
 
-              const summaryResponse: any = await axios.post(
+              const summaryResponse = await axios.post(
                 "https://api.openai.com/v1/chat/completions",
                 {
                   model: "gpt-3.5-turbo",
@@ -213,10 +155,9 @@ const HomeComponent = () => {
 
               setaudioText(summaryResponse.data.choices[0].message.content);
 
-              const data = await response.json();
               if (response.status !== 200) {
                 throw (
-                  data.error ||
+                  response.data.error ||
                   new Error(`Request failed with status ${response.status}`)
                 );
               }
@@ -230,7 +171,6 @@ const HomeComponent = () => {
         };
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.log("error", error);
     }
   };
@@ -266,7 +206,6 @@ const HomeComponent = () => {
               <input {...getInputProps()} />
 
               <div className="flex py-3">
-                {/* <Button onClick={sendAudio}>upload</Button> */}
                 <div>
                   <div style={{ display: "flex", justifyContent: "center" }}>
                     {status == "idle" && (
@@ -329,7 +268,6 @@ const HomeComponent = () => {
                   />
                 </div>
               )}
-              {/* <input type="file" onChange={handleuploadAudio}></input> */}
             </div>
           </div>
         )}
