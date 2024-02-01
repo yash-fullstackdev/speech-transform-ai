@@ -23,6 +23,7 @@ const HomeComponent = () => {
   // const [formData, setFormData] = useState<any>();
   const [audiotext, setaudioText] = useState<any>();
   const [isLoading, setIsloading] = useState(false);
+  const [summaryLoading, setSummaryLoading] = useState(false);
   const [convertedText, setCovertedText] = useState();
 
   const { status, startRecording, stopRecording, mediaBlobUrl } =
@@ -35,14 +36,12 @@ const HomeComponent = () => {
     });
 
   const handleuploadAudio = async (e: any, isDropped = false) => {
-    console.log("e", e[0], isDropped);
     let file;
     if (!isDropped && e?.target?.files && e.target.files[0]) {
       file = e.target.files[0];
     } else {
       file = e[0];
     }
-
     const data = new FormData();
     data.append("file", file);
     data.append("model", "whisper-1");
@@ -57,6 +56,8 @@ const HomeComponent = () => {
     }
 
     try {
+      setIsloading(true);
+      setSummaryLoading(true);
       console.log("formData", data);
       const res = await axios.post(
         "https://api.openai.com/v1/audio/transcriptions",
@@ -70,6 +71,7 @@ const HomeComponent = () => {
 
       const tdata = res.data;
       setCovertedText(tdata.text);
+      setIsloading(false);
 
       // API call For summary data
       const summaryResponse = await axios.post(
@@ -91,10 +93,12 @@ const HomeComponent = () => {
         }
       );
       setaudioText(summaryResponse?.data.choices[0].message.content);
+      setSummaryLoading(false);
     } catch {
       console.log("error");
     } finally {
       setIsloading(false);
+      setSummaryLoading(false);
     }
   };
 
@@ -119,6 +123,7 @@ const HomeComponent = () => {
 
           try {
             setIsloading(true);
+            setSummaryLoading(true);
             const reader: any = new FileReader();
             reader.readAsDataURL(convertToBlob);
             reader.onloadend = async function () {
@@ -133,6 +138,7 @@ const HomeComponent = () => {
               );
               const { text } = response.data;
               setCovertedText(text);
+              setIsloading(false);
 
               const summaryResponse = await axios.post(
                 "https://api.openai.com/v1/chat/completions",
@@ -154,6 +160,7 @@ const HomeComponent = () => {
               );
 
               setaudioText(summaryResponse.data.choices[0].message.content);
+              setSummaryLoading(false);
 
               if (response.status !== 200) {
                 throw (
@@ -167,6 +174,7 @@ const HomeComponent = () => {
             alert(error.message);
           } finally {
             setIsloading(false);
+            setSummaryLoading(false);
           }
         };
       }
@@ -272,44 +280,52 @@ const HomeComponent = () => {
           </div>
         )}
       </Dropzone>
-      {isLoading && <CircularProgress />}
+
       <div
         style={{
           display: "flex",
           flexDirection: "row",
-          alignItems: "center",
           padding: "40px",
+          justifyContent: "center",
         }}
       >
         <div>
-          {convertedText && (
-            <Card className="m-3">
+          {/* {convertedText && ( */}
+          <Card className="m-3" sx={{ width: 600, minHeight: 300 }}>
+            <CardContent>
+              <Typography gutterBottom variant="h5" component="div">
+                Converted Text
+              </Typography>
+              {isLoading && <CircularProgress />}
+              <Typography variant="body2" color="text.secondary">
+                {!convertedText &&
+                  !isLoading &&
+                  "No Data sync please process Data"}
+                {convertedText}
+              </Typography>
+            </CardContent>
+          </Card>
+          {/* )} */}
+        </div>
+        <div>
+          {/* {audiotext && ( */}
+          <>
+            <Card className="m-3" sx={{ width: 600, minHeight: 300 }}>
               <CardContent>
                 <Typography gutterBottom variant="h5" component="div">
-                  Converted Text
+                  Summary Text
                 </Typography>
+                {summaryLoading && <CircularProgress />}
                 <Typography variant="body2" color="text.secondary">
-                  {convertedText}
+                  {!audiotext &&
+                    !summaryLoading &&
+                    "No Data sync please process Data"}
+                  {audiotext}
                 </Typography>
               </CardContent>
             </Card>
-          )}
-        </div>
-        <div>
-          {audiotext && (
-            <>
-              <Card className="m-3">
-                <CardContent>
-                  <Typography gutterBottom variant="h5" component="div">
-                    Summary Text
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {audiotext}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </>
-          )}
+          </>
+          {/* )} */}
         </div>
       </div>
     </>
