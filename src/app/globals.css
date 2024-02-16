@@ -1,3 +1,29 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.voice-visualizer__canvas-container {
+  display: none !important;
+}
+
+.MuiSelect-select {
+  display: flex;
+  align-items: center !important;
+}
+
+.list-item-text > span {
+  font-weight: 900 !important;
+}
+
+.css-953pxc-MuiInputBase-root-MuiInput-root:before{
+  border-bottom: 0px !important;
+}
+
+.css-953pxc-MuiInputBase-root-MuiInput-root:hover:before{
+  border-bottom: 1px solid rgba(0, 0, 0, 0.42) !important;
+}
+
+.list-item-text > p {
+  font-weight: 600 !important;
+  color: black !important;
+}

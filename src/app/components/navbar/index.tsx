@@ -3,25 +3,20 @@ import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
-// import MenuIcon from "@mui/icons-material/Menu";
+import AccountMenu from "./_components/Profile";
+import Link from "next/link";
 
-export default function DenseAppBar() {
+export default function Navbar() {
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
-        <Toolbar variant="dense">
-          <IconButton
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            sx={{ mr: 2 }}
-          >
-            {/* <MenuIcon /> */}
-          </IconButton>
-          <Typography variant="h6" color="inherit" component="div">
-            Text AI
-          </Typography>
+      <AppBar position="fixed">
+        <Toolbar variant="dense" className="flex justify-between ">
+          <Link href="/">
+            <Typography variant="h6" color="inherit" component="div">
+              ƒ Speech Transfrom AI
+            </Typography>
+          </Link>
+          <AccountMenu />
         </Toolbar>
       </AppBar>
     </Box>

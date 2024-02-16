@@ -11,5 +11,5 @@ export const dataUrlToFile = (url: string, fileName: string) => {
   while (length--) {
     u8arr[length] = bstr.charCodeAt(length);
   }
-  return new File([u8arr], fileName, { type: mime });
+  return new File([u8arr], fileName, { type: "audio/wav" });
 };
